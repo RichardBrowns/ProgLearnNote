@@ -1,0 +1,285 @@
+# Java Web
+
+Java Web 是指使用Java语言开发的基于Web的应用程序。它允许开发者创建动态网页和应用程序，这些应用程序能够运行在服务器上，并通过HTTP协议与客户端（通常是Web浏览器）进行交互。Java Web开发的核心在于其平台无关性、强大的类库支持以及成熟稳定的生态系统。以下是Java Web的一些关键组件和工作流程概述：
+
+关键组件：
+
+1. Servlet：
+
+   Servlet是Java Web应用的核心组件之一，它是运行在服务器端的小程序，用于**接收和响应来自Web客户端的请求**。**Servlet容器**（如Tomcat、Jetty）**负责管理Servlet的生命周期和请求的分发**。
+
+2. JavaServer Pages（JSP）：
+
+   JSP是一种技术，它允许将Java代码嵌入到HTML页面中，以实现页面的动态生成。服务器在页面发送给客户端前，会先执行其中的Java代码。
+
+3. Java Persistence API（JPA）：
+
+   JPA是Java平台上的一个ORM（对象关系映射）规范，用于将Java对象持久化到关系型数据库中。它简化了数据库操作，使得开发者可以以面向对象的方式操作数据库。
+
+4. Enterprise JavaBeans（EJB）：
+
+   EJB是Java EE平台的一部分，用于开发可重用的服务器端组件，用于封装业务逻辑。它们提供了事务管理、安全性和并发控制等企业级服务。
+
+5. Java Web框架：
+
+   如Spring MVC、Struts、Hibernate等，这些框架为开发Java Web应用提供了更高层次的抽象，帮助开发者快速构建应用，同时遵循MVC（模型-视图-控制器）设计模式。
+
+工作流程：
+
+1. 用户请求：
+
+   用户通过Web浏览器发起HTTP请求到Web服务器。
+
+2. 服务器处理：
+
+   Web服务器（如Apache Tomcat）接收到请求后，根据配置将请求转交给相应的Servlet进行处理。
+
+3. Servlet处理：
+
+   Servlet读取请求参数，执行业务逻辑，可能包括访问数据库、调用其他服务等操作。
+
+4. 结果生成：
+
+   业务逻辑处理完毕后，Servlet可以选择直接向客户端返回响应，或者将控制权传递给JSP页面来动态生成HTML内容。
+
+5. 响应用户：
+
+   最终的HTML页面或数据被封装成HTTP响应，由Web服务器发送回用户的Web浏览器。
+
+6. 页面展示：
+
+   浏览器接收到响应后，解析HTML内容并呈现给用户。
+
+Java Web开发因其稳定性和强大的功能，在企业级应用开发中占据重要地位。随着技术的发展，现代Java Web开发也越来越多地采用微服务架构、Spring Boot等轻量级框架，以及前端技术如React、Vue.js等进行前后端分离的开发模式。
+
+## 设计一个简单的Web容器
+
+### Socket
+
+Socket，通常称为套接字，是计算机网络编程中用于实现进程间通信（IPC）或跨网络通信的一种接口。它提供了一种标准的方式来建立和管理两个应用程序之间的连接，无论是同一台机器的不同进程，还是分布在不同网络中的计算机。
+
+实际上，Socket 是在应用层和传输层之间的一个抽象层，它把 TCP/IP 层复杂的操作抽象为几个简单的接口，供应用层调用实现进程在网络中的通信。
+
+**套接字类型**
+
+- 流式套接字（Stream Sockets, SOCK_STREAM）：基于TCP协议，提供面向连接、可靠的数据传输，保证数据顺序和无丢失。
+- 数据报套接字（Datagram Sockets, SOCK_DGRAM）：基于UDP协议，无连接，不保证数据顺序和无丢失，但效率较高。
+
+**面向连接的时序图**
+
+<img src="https://img2020.cnblogs.com/blog/660329/202010/660329-20201010094439156-1397820811.png" alt="img" style="zoom: 67%;" />
+
+**ServerSocket生命周期**
+
+1. 创建：
+
+   通过调用ServerSocket(int port)构造函数，服务器创建一个ServerSocket实例，指定一个端口来监听客户端连接。
+
+   ```java
+        ServerSocket serverSocket = new ServerSocket(8080);
+   ```
+
+2. 监听：
+
+   服务器调用serverSocket.accept()方法进入监听状态。这个方法会阻塞，直到有客户端发起连接请求。
+
+3. 接受连接：
+
+   当客户端尝试连接时，accept()方法返回一个新的Socket对象，代表与客户端的连接。这个Socket对象是针对ClientSocket的实例，它是ServerSocket和客户端之间的通道。
+
+4. 处理请求：
+
+   服务器通过新创建的Socket对象与客户端进行数据交换。
+
+5. 关闭：
+
+   当不再需要监听新的连接时，关闭ServerSocket以释放资源
+
+   ```java
+   serverSocket.close();
+   ```
+
+**ClientSocket生命周期**
+
+1. 创建：
+
+   客户端创建一个Socket对象，指定要连接的服务器的IP地址和端口号
+
+   ```java
+        Socket clientSocket = new Socket("localhost", 8080);
+   ```
+
+2. 连接：
+
+   调用Socket的构造函数会尝试建立到服务器的连接。如果连接成功，客户端现在拥有一个到服务器的Socket。
+
+3. 数据交换：
+
+   一旦连接建立，客户端可以通过Socket的getInputStream()和getOutputStream()方法获取输入和输出流，用于发送和接收数据。
+
+4. 关闭：
+
+   当通信完成后，客户端关闭Socket以释放资源
+
+   ```java
+   clientSocket.close();
+   ```
+
+**关联关系**
+
+- ServerSocket和ClientSocket之间的关系是“一对多”：一个ServerSocket可以接受多个ClientSocket的连接请求，形成多个并发的客户端连接。
+- 每个ClientSocket都是独立的，与服务器之间的连接是点对点的，即每个客户端都有一个独立的Socket对象与其对应的服务器端Socket进行通信。
+- ServerSocket的accept()方法每次只处理一个客户端连接，如果希望同时处理多个连接，通常会使用多线程或者异步IO来处理每一个ClientSocket。
+
+这种模式在Java中被称为“阻塞I/O”，因为ServerSocket的accept()方法会阻塞，直到有新的客户端连接。在实际的高性能服务器实现中，通常会使用非阻塞I/O（NIO）或异步I/O（AIO）来提高并发性能。
+
+## Servlet
+
+Java Servlet是Java EE（Enterprise Edition）规范中的一部分，用于处理在Web服务器上运行的Java应用程序的HTTP请求和响应。Servlet通常用于构建动态的、可交互的Web应用程序。
+
+Servlet通过在服务器端运行Java代码来生成动态的Web内容。它们可以接收来自Web浏览器的HTTP请求，并生成基于请求的响应。
+
+Servlet在服务器端一次加载到内存中，创建Servlet实例，通过给请求配置线程，一个Servlet实例可以通过多线程执行多个请求。此外，Servlet具有可移植性，因为它们可以在支持Java Servlet规范的任何Web服务器上运行。
+
+### Servlet执行次序
+
+Servlet的执行次序可以简要描述为以下几个步骤：
+
+1. **Servlet初始化**：当Servlet容器启动时或者第一次接收到与Servlet相关的请求时，Servlet容器会加载并初始化Servlet。在初始化过程中，Servlet容器会调用Servlet的`init()`方法，该方法用于执行一些初始化操作，如读取配置信息、创建资源等。
+
+2. **请求处理**：当客户端发送请求时，Servlet容器会创建一个新的线程来处理该请求。对于每个请求，Servlet容器会调用Servlet的`service()`方法，并将包含请求信息的`HttpServletRequest`对象和用于响应的`HttpServletResponse`对象传递给`service()`方法。
+
+3. **请求分发**：在`service()`方法中，Servlet可以根据请求的类型（GET、POST等）和内容进行相应的处理。通常情况下，Servlet会根据请求类型调用相应的处理方法，如`doGet()`、`doPost()`等。在这些处理方法中，Servlet可以读取请求参数、执行业务逻辑、生成响应内容等。
+
+4. **生成响应**：在处理完请求后，Servlet会生成相应的响应内容，并将其写入到`HttpServletResponse`对象中。这些响应内容可以是HTML、XML、JSON等格式的数据，用于向客户端返回请求结果。
+
+5. **销毁**：当Servlet容器关闭时或者Servlet的生命周期结束时，Servlet容器会调用Servlet的`destroy()`方法，该方法用于执行一些清理操作，如释放资源、关闭连接等。
+
+这些步骤构成了Servlet的执行次序，Servlet容器负责管理整个过程，并确保每个请求都能被正确地处理和响应。
+
+### Servlet生命周期
+
+![img](http://www.runoob.com/wp-content/uploads/2014/07/Servlet-LifeCycle.jpg)
+
+Servlet的生命周期包括以下三个阶段：
+
+1. **初始化（Initialization）**：在Servlet容器启动时或者第一次接收到与Servlet相关的请求时，Servlet容器会加载并初始化Servlet。在初始化过程中，Servlet容器会调用Servlet的`init()`方法，该方法用于执行一些初始化操作，如读取配置信息、创建资源等。初始化方法只会在Servlet的生命周期中被调用一次。
+
+2. **服务（Servicing）**：一旦Servlet初始化完成，它就可以开始接收并处理客户端的请求。每当客户端发送请求时，Servlet容器都会调用Servlet的`service()`方法，并将包含请求信息的`HttpServletRequest`对象和用于响应的`HttpServletResponse`对象传递给`service()`方法。在`service()`方法中，Servlet可以根据请求的类型（GET、POST等）和内容进行相应的处理，生成并返回响应给客户端。
+
+3. **销毁（Destruction）**：当Servlet容器关闭时或者Servlet的生命周期结束时，Servlet容器会调用Servlet的`destroy()`方法。该方法用于执行一些清理操作，如释放资源、关闭连接等。销毁方法只会在Servlet的生命周期中被调用一次。
+
+这三个阶段构成了Servlet的生命周期，Servlet容器负责管理整个过程，并在适当的时候调用相应的方法。
+
+### Servlet API
+
+当谈到Servlet的API时，我们实际上在讨论Java编程语言中用于编写服务器端程序的一组类和接口。这些API提供了与HTTP协议通信所需的工具和功能，允许开发人员创建动态Web应用程序。
+
+```java
+public interface Servlet {
+    void init(ServletConfig var1) throws ServletException;
+
+    ServletConfig getServletConfig();
+
+    void service(ServletRequest var1, ServletResponse var2) throws ServletException, IOException;
+
+    String getServletInfo();
+
+    void destroy();
+}
+```
+
+**`init()` 方法**
+
+- `init()` 方法在 Servlet 被初始化时调用，它只会在 Servlet 的生命周期中被调用一次。
+- 在 `init()` 方法中，通常会执行一些初始化任务，比如读取配置信息、创建资源等。
+- 语法：`public void init(ServletConfig config) throws ServletException`
+
+```java
+public void init() throws ServletException {
+  // 初始化代码...
+}
+```
+
+**`service()` 方法**
+
+- `service()` 方法用于处理客户端的请求，它在每次接收到请求时被调用。
+- Servlet 容器负责调用 `service()` 方法，并将请求的信息传递给该方法。
+- 在 `service()` 方法中，开发人员通常根据请求的类型（GET、POST 等）执行相应的处理逻辑，并生成响应发送给客户端。
+- 语法：`public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException`
+- `ServletRequest` 用来封装请求信息，`ServletResponse` 用来封装响应信息，因此**本质上这两个类是对通信协议的封装。**
+
+```java
+public void service(ServletRequest request,
+                    ServletResponse response)
+      throws ServletException, IOException{
+}
+
+```
+
+**`doGet()` 方法**
+
+- `doGet()` 方法用于处理客户端发送的 GET 请求。
+- 语法：`protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException`
+
+```java
+protected  void doGet(HttpServletRequest request,
+                  HttpServletResponse response)
+    throws ServletException, IOException {
+    // Servlet 代码
+}
+
+```
+
+**`doPost()` 方法**
+
+- `doPost()` 方法用于处理客户端发送的 POST 请求。
+- 语法：`protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException`
+
+```java
+public void doPost(HttpServletRequest request,
+                   HttpServletResponse response)
+    throws ServletException, IOException {
+    // Servlet 代码
+}
+```
+
+**`destroy()` 方法**
+
+- `destroy()` 方法在 Servlet 被销毁时调用，它只会在 Servlet 的生命周期中被调用一次。
+- 在 `destroy()` 方法中，通常会执行一些清理任务，比如释放资源、关闭连接等。
+- 语法：`public void destroy()`
+
+```java
+  public void destroy() {
+    // 终止化代码...
+  }
+```
+
+### Servlet和HTTP状态码
+
+在 Servlet 中，HTTP 状态码是用于表示 HTTP 请求处理结果的标准化数字代码。Servlet 可以使用这些状态码来向客户端传达请求处理的结果或错误信息。以下是一些常见的 HTTP 状态码及其含义：
+
+1. **1xx - Informational（信息性状态码）**
+   - 100 Continue：服务器已收到请求的一部分，客户端应继续发送剩余的请求。
+   - 101 Switching Protocols：服务器已收到并理解客户端的请求，正在切换协议。
+
+2. **2xx - Success（成功状态码）**
+   - 200 OK：请求已成功处理。
+   - 201 Created：请求已被服务器创建了新资源。
+   - 204 No Content：服务器成功处理了请求，但没有返回任何内容。
+
+3. **3xx - Redirection（重定向状态码）**
+   - 301 Moved Permanently：请求的资源已被永久移动到新位置。
+   - 302 Found：请求的资源已临时移动到新位置。
+
+4. **4xx - Client Error（客户端错误状态码）**
+   - 400 Bad Request：服务器无法理解客户端的请求。
+   - 401 Unauthorized：请求需要身份验证。
+   - 404 Not Found：请求的资源不存在。
+
+5. **5xx - Server Error（服务器错误状态码）**
+   - 500 Internal Server Error：服务器遇到了意外错误，无法完成请求。
+   - 503 Service Unavailable：服务器当前无法处理请求，通常是由于过载或维护。
+
+Servlet 可以通过设置响应的状态码来向客户端传达相应的信息。例如，当 Servlet 成功处理请求时，可以设置状态码为 200；当发生错误时，可以设置合适的错误状态码来指示错误类型。通过适当地使用状态码，Servlet 可以更好地与客户端通信，提供清晰的请求处理结果。
