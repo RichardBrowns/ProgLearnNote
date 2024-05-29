@@ -57,7 +57,7 @@ public class BankAccount {
 
 ### 继承
 
-的继承（Inheritance）是一种创建新类的方式，新类（子类、派生类）继承了现有类（父类、基类）的特性和行为，并可以在此基础上添加新的特性或重写父类的方法。继承是面向对象的四大基本原则（封装、继承、多态、抽象）之一，其核心目的和特点包括：
+Java的继承（Inheritance）是一种创建新类的方式，新类（子类、派生类）继承了现有类（父类、基类）的特性和行为，并可以在此基础上添加新的特性或重写父类的方法。继承是面向对象的四大基本原则（封装、继承、多态、抽象）之一，其核心目的和特点包括：
 
 1. 代码复用
    - 继承允许子类直接获得父类的属性和方法，无需重复编写相同的代码。这大大提高了代码的可复用性，减少了冗余。
@@ -565,7 +565,7 @@ Java中的final关键字是一个非常重要的概念，它用于声明一个�
 
 5. 枚举（Enums）
 
-   - 枚举类型默认就是final的，不能被继承，且枚举常量的值也是不可变的。、
+   - 枚举类型默认就是final的，不能被继承，且枚举常量的值也是不可变的。
 
 使用final的关键在于确保某些东西不会在程序运行期间发生变化，从而提高代码的可预测性、安全性和效率。同时，final也是Java中的一个核心概念，尤其是在设计模式和并发编程中，如final常量用于线程安全，以及final方法和类在单例模式中的应用。
 
@@ -1009,8 +1009,8 @@ Class类，Class类也是一个实实在在的类，存在于JDK的java.lang包�
    - Class 类继承自 Object 类，这意味着所有类都是 Class 类的实例
    - 它也是 GenericDeclaration, Type, AnnotatedElement 的子类或实现类，表明它可以携带泛型信息、类型信息以及注解
 2. 静态成员变量：
-   - public static final Class<?>[] EMPTY_CLASS_ARRAY = {};：一个空的 Class 数组，常用于避免创建空数组的开销
-   - private static final int SYNTHETIC = 0x00001000;：标志位，表示类或成员是编译器生成的（比如桥接方法）
+   - public static final Class<?>[] EMPTY_CLASS_ARRAY = {};	一个空的 Class 数组，常用于避免创建空数组的开销
+   - private static final int SYNTHETIC = 0x00001000;               标志位，表示类或成员是编译器生成的（比如桥接方法）
 3. 构造方法：
    - Class 类的构造方法是私有的，确保只能由 JVM 创建 Class 实例
 4. 核心方法：
@@ -1534,29 +1534,464 @@ Java泛型是Java语言从JDK 1.5版本开始引入的一个重要特性，旨�
 
 ## 集合
 
-**核心接口继承关系**
+Java集合是Java语言中提供的一种数据结构框架，用于存储和操作对象的容器。集合框架位于java.util包中，它是一个统一的架构，允许我们对各种数据结构（如列表、集合、映射等）进行操作。Java集合框架主要包括以下几类：
 
-1. Collection -- 所有集合的根接口
-   - List -- 有序、可重复
-     - ArrayList，LinkedList
-   - Set -- 无序、不可重复
-     - HashSet，LinkedHashSet，TreeSet
-2. Map -- 键值对（key，value）集合
-   - HashMap，LinkedHashMap，TreeMap...
+1. **Collection接口**：这是集合框架的根接口，一个独立的元素序列。其直接子接口包括List、Set。
+   - **List接口**：表示一个有序的集合，允许元素重复，提供了按索引访问元素的方法。常用的实现类有ArrayList、LinkedList和Vector。
+   - **Set接口**：不允许包含重复元素的集合，不保证元素的顺序。主要实现类有HashSet（无序，基于哈希表）、LinkedHashSet（有序，基于哈希表和双向链表）和TreeSet（有序，基于红黑树）。
+2. **Map接口**：不同于Collection，Map是一种键值对(key-value pair)的存储结构。每个元素包含一个键对象和一个值对象，键是唯一的。主要实现类有HashMap（非线程安全，基于哈希表）、LinkedHashMap（保持插入顺序或访问顺序）、TreeMap（按键排序，基于红黑树）和ConcurrentHashMap（线程安全，高效并发访问）。
+3. **迭代器(Iterator)与列表迭代器(ListIterator)**：用于遍历集合中的元素。Iterator只能向前遍历，而ListIterator在List上使用时，还可以向后遍历以及修改元素。
+4. **流(Stream API)**：Java 8引入了Stream API，它提供了一种新的处理集合数据的方式，可以以声明性方式处理数据集合，如过滤、映射、归约等操作，更加方便高效。
+5. **工具类**：如Collections，提供了对集合进行排序、搜索、转换等各种操作的静态方法。
 
-**特殊接口**
+Java集合框架的设计遵循了泛型，这意味着你可以在创建集合时指定它们将持有的对象类型，从而增加了类型安全性和编译时检查。此外，集合框架还支持线程安全和非线程安全的实现，开发者可以根据具体需求选择合适的集合类。
 
-- Iterable -- 此接口被Collection继承，为不同的集合提供统一的遍历方式
-- Cloneable和Serializable -- 许多集合类实现了这些接口以支持克隆和序列化
+### ArrayList源码解析
 
-**不同集合的特点**
+`ArrayList`是Java集合框架中一个非常常用且功能强大的实现类，它继承自`List`接口。`ArrayList`内部是通过数组来实现的，这意味着它能够提供快速的随机访问（通过索引访问元素），但相较于链表结构，在进行插入和删除操作时可能效率较低，尤其是在列表的中间位置进行这些操作时。
 
-- ArrayList -- 动态数组实现，随机访问快，插入和删除慢
-- LinkedList -- 双向链表，插入和删除块，随机访问慢
-- HashSet -- 基于哈希表实现，无序，不允许重复
-- TreeSet -- 基于红黑树实现，有序，不允许重复
-- HashMap -- 哈希表实现，键值对，无序
-- TreeMap -- 红黑树实现，键值对，有序
+`ArrayList`的底层实现主要依赖于一个可动态调整大小的Object数组。以下是几个关键点和部分源码概述：
+
+1. 默认初始化容量：
+
+   `ArrayList`在没有指定初始容量时，默认创建一个容量为10的Object数组来存储元素。这个默认容量定义为`private static final int DEFAULT_CAPACITY = 10;`。
+
+2. 构造方法：
+
+   - 无参构造函数：public `ArrayList()`，会初始化一个默认容量的数组。
+   - 指定容量构造函数：`public ArrayList(int initialCapacity)`，用户可以指定初始容量，避免了多次自动扩容的开销。
+   - 复制构造函数：还可以通过一个集合实例来创建ArrayList，例如`ArrayList(Collection<? extends E> c)`，这将创建一个包含指定集合元素的新ArrayList。
+
+3. 动态扩容机制：
+
+   当数组空间不足时，`ArrayList`会自动扩容。扩容通常是原容量的1.5倍，通过计算得到新容量：`newCapacity = oldCapacity + (oldCapacity >> 1)`。扩容操作涉及创建一个更大的数组，并将原数组的所有元素复制到新数组中。
+
+4. 添加元素：
+
+   添加元素时，如果数组已满，则先执行扩容操作，然后将元素放入数组的相应位置。例如，`public boolean add(E e)`方法实现这一逻辑。
+
+5. 删除元素：
+
+   删除操作如`public E remove(int index)`，会移动索引大于被删除元素位置的所有后续元素，以填补空位，并返回被删除的元素。
+
+6. 快速访问：
+
+   由于使用数组实现，通过索引访问元素(`public E get(int index)`)非常快速。
+
+7. 序列化与扩容策略：
+
+   `ArrayList`实现了`Serializable`接口，支持序列化。它内部有几种不同的空数组常量，用于优化序列化时的空间占用，例如`EMPTY_ELEMENTDATA`、`DEFAULTCAPACITY_EMPTY_ELEMENTDATA`等，分别用于不同情况下的实例化。
+
+**底层数据结构**
+
+```java
+    /**
+     * 默认初始容量
+     */
+    private static final int DEFAULT_CAPACITY = 10;
+
+    /**
+     * 用于创建空对象的共享空数组实例
+     */
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    /**
+     * 用于默认大小的空数组实例的共享空数组实例。我们区分这个与EMPTY_ELEMENTDATA，以便在添加第一个元素时知道要膨胀多少
+     */
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+
+    /**
+     * ArrayList 中元素所存储的数组缓冲区
+     * ArrayList 的容量是该数组缓冲区的长度
+     * 任何空的 ArrayList（elementData 等于 DEFAULTCAPACITY_EMPTY_ELEMENTDATA）在添加第一个元素时都会被扩展为 			 * DEFAULT_CAPACITY
+     */
+    transient Object[] elementData; // 非私有，以简化嵌套类访问
+
+    /**
+     * ArrayList的大小（它包含的元素数量）。
+     *
+     * @serial
+     */
+    private int size;
+```
+
+**构造函数**
+
+```java
+    /**
+     * 构造一个具有指定初始容量的空列表
+     *
+     * @param  initialCapacity  列表的初始容量
+     * @throws IllegalArgumentException 如果指定的初始容量为负数
+     */
+    public ArrayList(int initialCapacity) {
+        if (initialCapacity > 0) {
+            this.elementData = new Object[initialCapacity];
+        } else if (initialCapacity == 0) {
+            this.elementData = EMPTY_ELEMENTDATA;
+        } else {
+            throw new IllegalArgumentException("Illegal Capacity: "+
+                                               initialCapacity);
+        }
+    }
+
+    /**
+     * 构建一个初始容量为10的空列表
+     */
+    public ArrayList() {
+        this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
+    }
+
+    /**
+     * 根据指定集合的迭代器返回的顺序，构建一个包含该集合元素的列表。
+     *
+     * @param c 要放入此列表中的元素的集合
+     * @throws 如果指定的集合为null，则抛出NullPointerException
+     */
+    public ArrayList(Collection<? extends E> c) {
+        elementData = c.toArray();
+        if ((size = elementData.length) != 0) {
+            // c.toArray 可能（错误地）不返回 Object[] 类型的数组
+            if (elementData.getClass() != Object[].class)
+                elementData = Arrays.copyOf(elementData, size, Object[].class);
+        } else {
+            // 替换为空数组
+            this.elementData = EMPTY_ELEMENTDATA;
+        }
+    }
+```
+
+**自动扩容**
+
+`ArrayList`的自动扩容机制是为了在集合中添加元素时，如果当前数组容量不足以存放新元素，自动增加数组容量的过程。下面是该机制的具体实现逻辑：
+
+1. 初始化与默认容量：
+   - 当使用无参构造器创建`ArrayList`时，它并不会立即分配实际的数组空间，而是初始化一个空的引用`elementData`。首次添加元素时，如果数组尚未分配，则会分配一个默认容量的数组，这个默认容量通常是10。
+   - 也可以在构造`ArrayList`时通过参数指定初始容量。
+2. 添加元素时的容量检查：
+   - 在调用`add(E e)`方法添加元素时，`ArrayList`会检查当前数组`elementData`的长度是否能容纳下一个元素。
+   - 如果当前数组已满（即元素数量等于数组长度），则触发扩容机制。
+3. 计算新容量：
+   - 扩容的核心方法是`grow(int minCapacity)`，其中`minCapacity`是至少需要的容量。
+   - 计算新容量的基本逻辑是将旧容量乘以1.5（即`oldCapacity + (oldCapacity >> 1)`），这是一种快速的乘法表示方法，相当于将容量扩大1.5倍，以此来减少频繁扩容导致的性能开销。
+   - 如果计算出的新容量仍小于`minCapacity`（即需要的最小容量），则新容量会被设置为`minCapacity`。
+4. 数组复制与更新引用：
+   - 使用`Arrays.copyOf()`方法创建一个新的数组，长度为计算得到的新容量。
+   - 将原数组`elementData`中的所有元素复制到新数组中。
+   - 更新`ArrayList`内部的`elementData`引用，使其指向新数组。
+   - 在新数组中添加新元素，并更新元素数量`size`。
+5. 容量上限：
+   - `ArrayList`的最大容量受`Integer.MAX_VALUE`限制，即大约为2^31 - 1。当数组接近这个最大值时，再次扩容可能只会增加一个元素的空间，因为超过这个界限会导致索引超出整型范围。
+
+通过上述步骤，`ArrayList`实现了动态地调整其内部数组的大小，以适应不断添加的元素，同时尽量减少了扩容操作带来的性能开销。
+
+```java
+    /**
+     * 如果必要，增加此<tt>ArrayList</tt>实例的容量，以确保它能容纳至少由最小容量参数指定的元素数量。
+     *
+     * @param   minCapacity   期望的最小容量
+     */
+    public void ensureCapacity(int minCapacity) {
+        int minExpand = (elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA)
+            // 如果不是默认元素表，则为任何尺寸
+            ? 0
+            // 大于默认值的默认空表。它已经被设定为默认大小
+            : DEFAULT_CAPACITY;
+
+        if (minCapacity > minExpand) {
+            ensureExplicitCapacity(minCapacity);
+        }
+    }
+
+    private static int calculateCapacity(Object[] elementData, int minCapacity) {
+        if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
+            return Math.max(DEFAULT_CAPACITY, minCapacity);
+        }
+        return minCapacity;
+    }
+
+    private void ensureCapacityInternal(int minCapacity) {
+        ensureExplicitCapacity(calculateCapacity(elementData, minCapacity));
+    }
+
+    private void ensureExplicitCapacity(int minCapacity) {
+        modCount++;
+
+        // 注重防溢出的代码
+        if (minCapacity - elementData.length > 0)
+            grow(minCapacity);
+    }
+
+    /**
+     * 分配数组的最大大小
+     * 一些虚拟机在数组中预留了一些头信息字
+     * 尝试分配更大的数组可能会导致内存溢出错误：请求的数组大小超过了VM限制。
+     */
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+    /**
+     * 增加容量以确保它能够容纳至少由最小容量参数指定的数量的元素
+     *
+     * @param minCapacity 期望的最小容量
+     */
+    private void grow(int minCapacity) {
+        // 注重防溢出的代码
+        int oldCapacity = elementData.length;
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0)
+            newCapacity = minCapacity;
+        if (newCapacity - MAX_ARRAY_SIZE > 0)
+            newCapacity = hugeCapacity(minCapacity);
+        // minCapacity 通常接近于 size，因此这是一个有利因素：
+        elementData = Arrays.copyOf(elementData, newCapacity);
+    }
+
+    private static int hugeCapacity(int minCapacity) {
+        if (minCapacity < 0) // 溢出
+            throw new OutOfMemoryError();
+        return (minCapacity > MAX_ARRAY_SIZE) ?
+            Integer.MAX_VALUE :
+            MAX_ARRAY_SIZE;
+    }
+```
+
+![ArrayList_grow](https://pdai.tech/images/collection/ArrayList_grow.png)
+
+**add()，addAll()**
+
+```java
+	/**
+     * 将指定的元素追加到此列表的末尾。
+     *
+     * @param e 要添加到此列表中的元素
+     * @return <tt>true</tt>
+     */
+    public boolean add(E e) {
+        ensureCapacityInternal(size + 1);  // 增加 modCount!!
+        elementData[size++] = e;
+        return true;
+    }
+
+    /**
+     * 在列表的指定位置插入指定的元素。将当前位于该位置的元素（如果有的话）及其后的所有元素向右移动（它们的索引+1）。
+     *
+     * @param index 指定元素要插入的索引位置
+     * @param element 要插入的元素
+     * @throws IndexOutOfBoundsException
+     */
+    public void add(int index, E element) {
+        rangeCheckForAdd(index);
+
+        ensureCapacityInternal(size + 1);  // 增加 modCount!!
+        System.arraycopy(elementData, index, elementData, index + 1,
+                         size - index);
+        elementData[index] = element;
+        size++;
+    }
+```
+
+![ArrayList_add](https://pdai.tech/images/collection/ArrayList_add.png)
+
+```java
+	/**
+     * 将指定集合中的所有元素按照该集合的迭代器返回的顺序追加到此列表的末尾
+     * 这个操作的行为是未定义的，如果在操作进行过程中指定的集合被修改了。
+     * （这意味着，如果指定的集合就是这个列表，并且这个列表非空，那么这个调用的行为也是未定义的。）
+     *
+     * @param c 包含要添加到此列表中的元素的集合
+     * @return <tt>true</tt> 如果这个列表因为调用而发生了变化
+     * @throws NullPointerException 如果指定的集合为null
+     */
+    public boolean addAll(Collection<? extends E> c) {
+        Object[] a = c.toArray();
+        int numNew = a.length;
+        ensureCapacityInternal(size + numNew);  // 增加 modCount
+        System.arraycopy(a, 0, elementData, size, numNew);
+        size += numNew;
+        return numNew != 0;
+    }
+
+    /**
+     * 插入指定集合中的所有元素到此列表中，从指定位置开始。
+     * 将位于该位置的元素（如果有的话）及其后面的所有元素向右移动（增加它们的索引）。
+     * 新元素将按照指定集合的迭代器返回的顺序出现在列表中。
+     *
+     * @param index 要插入来自指定集合的第一个元素的索引位置
+     * @param c 包含要添加到此列表中的元素的集合
+     * @return <tt>true</tt> 如果这个列表因为调用而发生了变化
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     * @throws NullPointerException 如果指定的集合为null
+     */
+    public boolean addAll(int index, Collection<? extends E> c) {
+        rangeCheckForAdd(index);
+
+        Object[] a = c.toArray();
+        int numNew = a.length;
+        ensureCapacityInternal(size + numNew);  // 增加 modCount
+
+        int numMoved = size - index;
+        if (numMoved > 0)
+            System.arraycopy(elementData, index, elementData, index + numNew,
+                             numMoved);
+
+        System.arraycopy(a, 0, elementData, index, numNew);
+        size += numNew;
+        return numNew != 0;
+    }
+```
+
+**set()**
+
+```java
+    /**
+     * 将此列表中指定位置的元素替换为指定的元素
+     *
+     * @param index 要替换的元素的索引
+     * @param element 要存储在指定位置的元素
+     * @return 先前位于指定位置的元素
+     * @throws IndexOutOfBoundsException
+     */
+    public E set(int index, E element) {
+        rangeCheck(index);
+
+        E oldValue = elementData(index);
+        elementData[index] = element;
+        return oldValue;
+    }
+```
+
+**get()**
+
+```java
+    /**
+     * 返回此列表中指定位置的元素
+     *
+     * @param  index 要返回的元素的索引
+     * @return 此列表中指定位置的元素
+     * @throws IndexOutOfBoundsException
+     */
+    public E get(int index) {
+        rangeCheck(index);
+
+        return elementData(index);
+    }
+```
+
+**remove()**
+
+```java
+    /**
+     * 移除此列表中指定位置的元素。
+     * 将所有后续元素向左移动（从它们的索引中减去一）。
+     *
+     * @param 要移除的元素的索引
+     * @return 从列表中移除的元素
+     * @throws IndexOutOfBoundsException
+     */
+    public E remove(int index) {
+        rangeCheck(index);
+
+        modCount++;
+        E oldValue = elementData(index);
+
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+            elementData[--size] = null; // 让垃圾回收机制能够正常运行
+
+        return oldValue;
+    }
+
+    /**
+     * 从该列表中移除指定元素的第一个出现，如果存在的话
+     * 如果列表中不包含该元素，则列表保持不变
+     *
+     * @param o 要从该列表中移除的元素，如果存在的话
+     * @return <tt>true</tt> 如果这个列表包含了指定的元素
+     */
+    public boolean remove(Object o) {
+        if (o == null) {
+            for (int index = 0; index < size; index++)
+                if (elementData[index] == null) {
+                    fastRemove(index);
+                    return true;
+                }
+        } else {
+            for (int index = 0; index < size; index++)
+                if (o.equals(elementData[index])) {
+                    fastRemove(index);
+                    return true;
+                }
+        }
+        return false;
+    }
+```
+
+**trimToSize()**
+
+```java
+    /**
+     * 此操作将此 <tt>ArrayList</tt> 实例的容量缩小为列表当前的大小。
+     * 应用程序可以使用此操作来最小化 <tt>ArrayList</tt> 实例的存储需求。
+     */
+    public void trimToSize() {
+        modCount++;
+        if (size < elementData.length) {
+            elementData = (size == 0)
+              ? EMPTY_ELEMENTDATA
+              : Arrays.copyOf(elementData, size);
+        }
+    }
+```
+
+**indexOf()，lastIndexOf()**
+
+```java
+    /**
+     * 返回指定元素在该列表中第一次出现的索引，如果该列表不包含此元素，则返回-1
+     */
+    public int indexOf(Object o) {
+        if (o == null) {
+            for (int i = 0; i < size; i++)
+                if (elementData[i]==null)
+                    return i;
+        } else {
+            for (int i = 0; i < size; i++)
+                if (o.equals(elementData[i]))
+                    return i;
+        }
+        return -1;
+    }
+
+    /**
+     * 返回指定元素在该列表中最后一次出现的索引，如果该列表不包含此元素，则返回-1。
+     */
+    public int lastIndexOf(Object o) {
+        if (o == null) {
+            for (int i = size-1; i >= 0; i--)
+                if (elementData[i]==null)
+                    return i;
+        } else {
+            for (int i = size-1; i >= 0; i--)
+                if (o.equals(elementData[i]))
+                    return i;
+        }
+        return -1;
+    }
+```
+
+**Fail Fast机制**
+
+在Java中，ArrayList的“Fail-Fast”机制是一种错误快速检测的行为，主要应用于迭代器（Iterator）和列表迭代器（ListIterator）中。当多个线程同时访问集合对象，且其中一个线程修改了集合的结构（比如添加或删除元素），而其他线程正在进行迭代时，Fail-Fast机制会抛出`ConcurrentModificationException`异常，以迅速反馈并发修改的问题，防止产生不可预期的结果。
+
+Fail-Fast机制是通过一个名为`modCount`的变量来实现的。每当对ArrayList进行添加、删除等修改结构的操作时，`modCount`的值就会增加。迭代器在迭代过程中会保留一个名为`expectedModCount`的变量，其值初始化为集合的`modCount`值。每次迭代前，迭代器都会检查`modCount`是否仍然等于`expectedModCount`，如果不等，则说明集合已经被其他线程修改过，此时迭代器就会抛出`ConcurrentModificationException`异常。
+
+需要注意的是，Fail-Fast机制并不能保证绝对的线程安全，它只是提供了一种检测并发修改的手段。如果需要在多线程环境下安全地使用ArrayList，应该使用`Collections.synchronizedList(List<T> list)`方法将其转换为线程安全的列表，或者使用`CopyOnWriteArrayList`，它是线程安全的，并且在修改时会创建集合的副本，从而避免并发问题，但请注意这会增加内存消耗和一定的性能开销。
+
+### LinkedList源码解析
+
+
 
 ## 注解
 
