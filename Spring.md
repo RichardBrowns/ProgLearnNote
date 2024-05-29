@@ -2802,17 +2802,5 @@ MyBatis-Plus 作为 MyBatis 的增强工具，旨在解决以下问题：
 
 ### 应用部署
 
-## MyBatis
-
-**MyBatis官方教程：https://mybatis.org/mybatis-3/zh_CN/index.html**
-
-## MyBatis-Plus
-
-**MyBatis-Plus官方教程：https://baomidou.com/introduce/**
-
-
-
-
-
 
 
