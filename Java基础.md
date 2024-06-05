@@ -3686,6 +3686,48 @@ public abstract class InputStream implements Closeable {
     public int read(byte b[]) throws IOException {
         return read(b, 0, b.length);
     }
+    
+    /**
+    * 从输入流中读取最多 len 字节的数据到字节数组中。
+    * 尝试读取 len 字节那么多的数据，但实际读取的字节数可能较小。
+    * 实际读取的字节数将作为整数返回。
+    *
+    * 此方法会一直阻塞，直到有输入数据可用、检测到文件结束或抛出异常
+    *
+    * 如果 len 为零，则不读取任何字节并返回 0；否则，尝试至少读取一个字节。
+    * 如果因为流已到达文件末尾而没有可用的字节，则返回值 -1；否则，至少读取一个字节并存储到 b 中。
+    *
+    * 读取的第一个字节存储在元素b[off]中，下一个字节存储在b[off+1]中，以此类推。读取的字节数最多等于len。
+    * 设实际读取的字节数为k；这些字节将被存储在元素b[off]到b[off+k-1]中，使得元素b[off+k]到b[off+len-1]保持不变。
+    */
+    public int read(byte b[], int off, int len) throws IOException {
+        if (b == null) {
+            throw new NullPointerException();
+        } else if (off < 0 || len < 0 || len > b.length - off) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return 0;
+        }
+
+        int c = read();
+        if (c == -1) {
+            return -1;
+        }
+        b[off] = (byte)c;
+
+        int i = 1;
+        try {
+            for (; i < len ; i++) {
+                c = read();
+                if (c == -1) {
+                    break;
+                }
+                b[off + i] = (byte)c;
+            }
+        } catch (IOException ee) {
+        }
+        return i;
+    }
 }
 
 ```

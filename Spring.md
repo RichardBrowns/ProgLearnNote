@@ -59,7 +59,28 @@ org.springframework.context.ApplicationContext 接口代表 Spring IoC 容器，
 
 ApplicationContext 接口的几个实现是 Spring 核心的一部分。 在独立应用程序中，通常创建 AnnotationConfigApplicationContext 或 ClassPathXmlApplicationContext 的实例。
 
-在大多数应用场景下，不需要显式地声明一个或多个Spring IOC容器实例。例如，在普通 Web 应用程序场景中，应用程序的 web.xml 文件中的简单样式 Web 描述符 XML 就足够了。在 Spring Boot 场景中，应用程序上下文是根据常见的设置约定隐式声明的。
+在大多数应用场景下，不需要显式地声明一个或多个Spring IOC容器实例。例如，在传统Web 应用程序场景中，应用程序的 web.xml 文件配置一个`ContextLoaderListener`或`DispatcherServlet`，就可以自动初始化Spring的IoC容器。`ContextLoaderListener`负责加载根应用上下文，而`DispatcherServlet`可以加载自己的Web应用上下文，两者共同构成了整个应用的环境。
+
+```xml
+<!-- web.xml 示例 -->
+<listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+</listener>
+
+<servlet>
+    <servlet-name>springmvc</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/spring/appServlet/servlet-context.xml</param-value>
+    </init-param>
+    <!-- ... -->
+</servlet>
+```
+
+在 Spring Boot 场景中，采用了“约定优于配置”的设计理念，Spring Boot通过自动配置（Auto-configuration）和starter依赖自动发现并配置应用所需的各种组件。默认情况下，Spring Boot会自动创建并初始化一个ApplicationContext（IoC容器），并基于应用类路径上的组件、属性文件（如`application.properties`或`application.yml`）以及其他约定进行配置。
+
+例如，添加`spring-boot-starter-web`依赖后，Spring Boot会自动设置嵌入式的Web服务器（如Tomcat）、Spring MVC配置以及其他相关服务，而不需要显式地声明容器或配置大量的XML或Java配置类。开发者只需关注业务逻辑和自定义配置，极大地提高了开发效率。
 
 下图显示了 Spring 工作原理的高级视图。 您的应用程序类与配置元数据相结合，以便在创建并初始化 ApplicationContext 后，您拥有一个完全配置且可执行的系统或应用程序。
 
@@ -437,7 +458,7 @@ DI主要存在两种变体：基于构造函数的依赖注入和基于setter的
 
 ### Spring AOP
 
-面向切面编程（AOP）通过提供另一种思考程序结构的方式，补充了面向对象编程（OOP）。在OOP中，模块化的关键单元是类，而在AOP中，模块化的单元则是切面。切面使得能够将横跨多个类型和对象的关注点（如事务管理）进行模块化。
+面向切面编程（AOP）通过提供另一种思考程序结构的方式，补充了面向对象编程（OOP）。在OOP中，模块化的关键单元是类，而在AOP中，模块化的单元则是切面。切面是对横跨多个类型和对象的关注点（如事务管理）进行模块化。
 
 Spring框架的一个核心组件就是AOP框架。虽然Spring的IoC容器并不依赖于AOP（这意味着如果你不想使用AOP，就不必使用它），但AOP与Spring IoC相结合，提供了一个非常强大的中间件解决方案。
 
@@ -705,6 +726,10 @@ Spring Boot使创建可独立运行、生产级别的基于Spring的应用程序
 - 尽可能自动配置Spring及第三方库
 - 提供生产就绪特性，如指标监控、健康检查和外部化配置
 - 完全无需代码生成，也无需XML配置
+
+### 起步依赖
+
+### 自动配置
 
 ### 添加内存数据库H2
 
