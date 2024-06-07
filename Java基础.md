@@ -2506,6 +2506,114 @@ add(int index,E element)：
 
 ### HashSet&HashMap源码解析
 
+#### 概述
+
+把HashSet和HashMap放到一起，因为HashSet本质上是采用适配器模式，对HashMap进行封装。
+
+#### Java7 HashMap
+
+HashMap实现了Map接口，允许key有一个null值，value有任意null值。
+
+不保证元素顺序，比方进行扩容操作的时候，所有的节点可能会重新分布，因此迭代同一个HashMap，它的顺序可能不同。
+
+Java7 HashMap应对哈希冲突采取的方案是**冲突链表方式**。
+
+<img src="https://pdai.tech/images/collection/HashMap_base.png" alt="HashMap_base" style="zoom:67%;" />
+
+如图所示，在hashcode()方法合理的情况下，put()和get()方法可在常数时间内完成。
+
+但是对HashMap进行迭代，需要遍历整个table和每一个冲突链表，所以在迭代频繁的场景里，初始容量不宜过大。
+
+HashMap的性能主要受初始容量和负载因子的影响，选择初始容量和负载因子时，需要综合考量数据规模、性能需求、内存限制等因素，找到最适合你应用场景的配置。在不确定的情况下，遵循默认设置（初始容量16，负载因子0.75）通常是一个安全且性能不错的选择。
+
+当把自定义的类作为HashMap的键时，需要重写hashcode()和equals()方法
+
+- `hashCode()`方法应该为不同的对象返回不同的哈希值（理想情况下），并且对于相等的对象（根据`equals()`定义），必须返回相同的哈希值。
+- `equals()`方法用来确定两个对象是否逻辑上相等。
+
+**get()**
+
+`get(Object key)`方法根据指定的key值返回对应的value，该方法调用`getEntry(Object key)`得到相应的entry，然后返回`entry.getValue()`。
+
+算法思想：首先通过`hash()`函数得到对应的`bucket`下标，然后依次遍历冲突链表，通过`key.equals(k)`方法判断是否是要找的那个`entry`。
+
+<img src="https://pdai.tech/images/collection/HashMap_getEntry.png" alt="HashMap_getEntry" style="zoom:67%;" />
+
+上图中`hash(k)&(table.length-1)`等价于`hash(k)%table.length`，原因是*HashMap*要求`table.length`必须是2的指数，因此`table.length-1`就是二进制低位全是1，跟`hash(k)`相与会将哈希值的高位全抹掉，剩下的就是余数了。
+
+```java
+final Entry<K,V> getEntry(Object key) {
+	......
+	int hash = (key == null) ? 0 : hash(key);
+    for (Entry<K,V> e = table[hash&(table.length-1)]; //得到冲突链表
+         e != null; e = e.next) { //依次遍历冲突链表中的每个entry
+        Object k;
+        //依据equals()方法判断是否相等
+        if (e.hash == hash &&
+            ((k = e.key) == key || (key != null && key.equals(k))))
+            return e;
+    }
+    return null;
+}
+```
+
+**put()**
+
+`put(K key,V value)`方法是将指定的`key,value`对添加到map里。该方法首先会对`map`做一次查找，看是否包含该元组，如果已经包含则直接返回，查找过程类似于`getEntry()`方法；如果没有找到，则会通过`addEntry(int hash, K key, V value, int bucketIndex)`方法插入新的`entry`，插入方式为**头插法**。
+
+<img src="https://pdai.tech/images/collection/HashMap_addEntry.png" alt="HashMap_addEntry" style="zoom:67%;" />
+
+```java
+void addEntry(int hash, K key, V value, int bucketIndex) {
+    if ((size >= threshold) && (null != table[bucketIndex])) {
+        resize(2 * table.length);//自动扩容，并重新哈希
+        hash = (null != key) ? hash(key) : 0;
+        bucketIndex = hash & (table.length-1);//hash%table.length
+    }
+    //在冲突链表头部插入新的entry
+    Entry<K,V> e = table[bucketIndex];
+    table[bucketIndex] = new Entry<>(hash, key, value, e);
+    size++;
+}
+```
+
+**remove()**
+
+`remove(Object key)`的作用是删除`key`值对应的`entry`，该方法的具体逻辑是在`removeEntryForKey(Object key)`里实现的。`removeEntryForKey()`方法会首先找到`key`值对应的`entry`，然后删除该`entry`(修改链表的相应引用)。查找过程跟`getEntry()`过程类似。
+
+<img src="https://pdai.tech/images/collection/HashMap_removeEntryForKey.png" alt="HashMap_removeEntryForKey" style="zoom:67%;" />
+
+```java
+final Entry<K,V> removeEntryForKey(Object key) {
+	......
+	int hash = (key == null) ? 0 : hash(key);
+    int i = indexFor(hash, table.length);//hash&(table.length-1)
+    Entry<K,V> prev = table[i];//得到冲突链表
+    Entry<K,V> e = prev;
+    while (e != null) {//遍历冲突链表
+        Entry<K,V> next = e.next;
+        Object k;
+        if (e.hash == hash &&
+            ((k = e.key) == key || (key != null && key.equals(k)))) {//找到要删除的entry
+            modCount++; size--;
+            if (prev == e) table[i] = next;//删除的是冲突链表的第一个entry
+            else prev.next = next;
+            return e;
+        }
+        prev = e; e = next;
+    }
+    return e;
+}
+```
+
+#### Java8 HashMap
+
+Java8的HashMap将数据结构改为数组+链表+红黑树组成。
+
+当进行检索操作时，首先根据hash值定位到数组的下标，然后遍历冲突链表，时间复杂度为O(N)。当冲突链表中的元素达到8个时，链表会转化为红黑树，时间复杂度为O(logN)。
+
+<img src="https://pdai.tech/images/java/java-collection-hashmap8.png" alt="img" style="zoom: 50%;" />
+
 ### LinkedHashSet&Map源码解析
 
 ### TreeSet&TreeMap源码解析
@@ -3732,3 +3840,52 @@ public abstract class InputStream implements Closeable {
 
 ```
 
+### Java IO - OutputStream源码
+
+### Java IO - 常用类
+
+#### File类
+
+Java的`java.io.File`类是位于`java.io`包中的一个关键类，它用于表示文件和目录的路径名，提供了大量的静态方法和实例方法来创建、删除、检查、读取和修改文件及目录的属性。以下是关于`File`类的一些核心特性和常用方法的概述：
+
+**特性**
+
+- 平台无关系：`File`类提供了一个与平台无关的方式来表示文件和目录路径。
+- 抽象表示：`File`对象是对实际文件或目录的抽象表示，并不直接关联文件内容，而是用于操作文件或目录的元数据信息。
+- 不可变性：一旦创建了`File`对象，它所代表的路径名便不可更改，要指向另一个文件或目录，需要创建一个新的`File`对象。
+
+**构造方法**
+
+- File(String pathname)：通过路径名字符串创建File对象。
+- File(String parent, String child)：使用父目录路径和子路径创建File对象。
+- File(File parent, String child)：使用父File对象和子路径创建File对象。
+- File(URI uri)：通过统一资源标识符(URI)创建File对象。
+
+**常用方法**
+
+- 创建和删除
+  - `createNewFile()`：创建一个新文件。
+  - `mkdir()`：创建单级目录。
+  - `mkdirs()`：创建多级目录。
+  - `delete()`：删除文件或空目录。
+- 检查文件或目录状态
+  - `exists()`：判断文件或目录是否存在。
+  - `isDirectory()`：判断是否为目录。
+  - `isFile()`：判断是否为文件。
+  - `canRead()`, `canWrite()`, `canExecute()`：检查文件的读、写、执行权限。
+- 获取信息
+  - `length()`：返回文件的长度（字节）。
+  - `lastModified()`：返回文件最后修改的时间。
+  - `getName()`：获取文件或目录的名称。
+  - `getParent()`：获取父目录的路径名。
+- 列出目录内容
+  - `list()`：返回一个字符串数组，包含指定目录下的所有文件和目录名称。
+  - `listFiles()`：返回一个`File`数组，包含指定目录下的所有文件和目录对象。
+- 重命名和移动
+  - `renameTo(File dest)`：重命名文件或移动文件到指定位置。
+
+**注意**
+
+尽管`File`类提供了丰富的文件系统操作，但它不支持直接读写文件内容。对于文件内容的读写操作，需要结合`java.io`包中的其他类，如`FileInputStream`、`FileOutputStream`、`BufferedReader`、`BufferedWriter`等。
+
+随着Java 7引入的`java.nio.file.Paths`和`Path`接口，提供了更现代、功能更强大的文件操作方式，但`File`类仍然被广泛使用，尤其是在需要兼容旧代码或API时。
