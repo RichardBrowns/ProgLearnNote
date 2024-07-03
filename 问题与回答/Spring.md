@@ -634,10 +634,251 @@ public class LoggingAspect {
   - `*.*` 匹配所有方法。
   - `(..)` 表示可以接受任意数量和类型的参数。
 
-# Spring访问数据相关？
+# Data Access/Integration
 
-# Spring事务管理？
+# Web
 
-# Spring MVC?
+<img src="https://s2.51cto.com/images/blog/202305/25192800_646f4640cff5224503.jpg?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_30,g_se,x_10,y_10,shadow_20,type_ZmFuZ3poZW5naGVpdGk=/format,webp/resize,m_fixed,w_1184" alt="springmvc架构详解 springmvc架构图_MVC" style="zoom: 67%;" />
+
+## Spring MVC的核心组件有哪些？
+
+1. DispatchServlet：前端控制器
+2. HandlerMapping：处理器映射器
+3. HandlerAdapter：处理器适配器
+4. Controller：处理器
+5. ModelAndView：处理器处理结果
+6. ViewResolver：视图解析器
+
+## 什么是DispatcherServlet，它有什么作用？
+
+`DispatcherServlet`在Spring MVC中作为前端控制器，负责接收、分发请求，以及处理响应，协调各个组件工作，是框架的核心枢纽。
+
+## 解释一下Spring MVC的请求处理流程？
+
+请求首先到达DispatcherServlet，DispatcherServlet通过HandlerMapping找到相应的处理器（Controller），处理器处理请求并返回ModelAndView，DispatcherServlet再通过ViewResolver找到相应的视图并渲染输出。
+
+## 如何在Spring MVC中处理表单数据提交？
+
+可以使用`@ModelAttribute`注解将表单数据绑定到Java对象，并在控制器方法中接收该对象进行处理。
+
+## 如何在Spring MVC中进行文件上传？
+
+可以使用`MultipartFile`类，并在控制器方法中接收`MultipartFile`对象，处理文件上传逻辑。
+
+## 如何在Spring MVC中进行数据验证？
+
+可以使用`@Valid`注解结合JSR-303/JSR-380（Bean Validation）进行数据验证，并处理BindingResult对象中的验证错误。
+
+## 如何在Spring MVC中处理异常？
+
+可以使用`@ExceptionHandler`注解定义全局或局部异常处理方法，或者使用`@ControllerAdvice`进行全局异常处理。
+
+## 解释一下Spring MVC中的视图解析机制？
+
+视图解析由ViewResolver接口及其实现类完成，根据视图名称解析出具体的视图对象。
+
+## Spring MVC中的拦截器（Interceptor）是什么？如何使用它们？
+
+拦截器用于在请求处理的各个阶段（如处理请求前、处理请求后、视图渲染前）执行额外的逻辑。可以通过实现HandlerInterceptor接口并在配置类中注册拦截器来使用。
+
+## 你在实际项目中遇到过哪些Spring MVC的性能问题？是如何解决的？
+
+## 请描述一下你如何在Spring MVC项目中实现RESTful API
+
+## Spring MVC与Spring Boot结合使用时，有哪些常见的配置和优化技巧？
 
 # Spring框架集成？
+
+## Spring集成MyBatis最佳实践？
+
+在Spring应用中集成MyBatis，可以利用MyBatis强大的SQL映射能力和Spring的依赖注入与事务管理功能，达到简洁且高效的数据访问层。以下是Spring集成MyBatis的一些最佳实践：
+
+1. **配置Mybatis与Spring集成**
+
+   **配置数据源和MyBatis SqlSessionFactory**
+
+   使用Spring配置文件或Java配置类来配置数据源和MyBatis的`SqlSessionFactory`。
+
+   ```java
+   @Configuration
+   public class MyBatisConfig {
+   
+       @Bean
+       public DataSource dataSource() {
+           HikariConfig config = new HikariConfig();
+           config.setJdbcUrl("jdbc:mysql://localhost:3306/mydb");
+           config.setUsername("user");
+           config.setPassword("password");
+           return new HikariDataSource(config);
+       }
+   
+       @Bean
+       public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
+           SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+           factoryBean.setDataSource(dataSource);
+           factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:mappers/*.xml"));
+           return factoryBean.getObject();
+       }
+   
+       @Bean
+       public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
+           return new SqlSessionTemplate(sqlSessionFactory);
+       }
+   }
+   ```
+
+   **配置Mapper扫描**
+
+   使用`@MapperScan`注解扫描Mapper接口所在的包。
+
+   ```java
+   @SpringBootApplication
+   @MapperScan("com.example.project.mapper")
+   public class MyApplication {
+       public static void main(String[] args) {
+           SpringApplication.run(MyApplication.class, args);
+       }
+   }
+   ```
+
+2. **定义Mapper接口和XML映射文件**
+
+   **定义Mapper接口**
+
+   在Mapper接口中定义SQL操作方法，并使用注解或XML配置进行SQL映射。
+
+   ```java
+   public interface UserMapper {
+       @Select("SELECT * FROM users WHERE id = #{id}")
+       User getUserById(int id);
+   
+       @Insert("INSERT INTO users(name, email) VALUES(#{name}, #{email})")
+       @Options(useGeneratedKeys = true, keyProperty = "id")
+       void insertUser(User user);
+   }
+   ```
+
+   **定义XML映射文件**
+
+   在`resources/mappers`目录下定义XML映射文件。
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8" ?>
+   <!DOCTYPE mapper
+       PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+       "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   <mapper namespace="com.example.project.mapper.UserMapper">
+   
+       <select id="getUserById" parameterType="int" resultType="User">
+           SELECT * FROM users WHERE id = #{id}
+       </select>
+   
+       <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+           INSERT INTO users(name, email) VALUES(#{name}, #{email})
+       </insert>
+       
+   </mapper>
+   ```
+
+3. **使用Mapper接口**
+
+   在Service层或其他地方注入Mapper接口，调用其方法进行数据库操作。
+
+   ```java
+   @Service
+   public class UserService {
+   
+       @Autowired
+       private UserMapper userMapper;
+   
+       public User getUserById(int id) {
+           return userMapper.getUserById(id);
+       }
+   
+       @Transactional
+       public void createUser(User user) {
+           userMapper.insertUser(user);
+       }
+   }
+   ```
+
+4. **使用事务管理**
+
+   利用Spring的事务管理功能，确保数据库操作的原子性和一致性。可以通过注解或XML配置实现事务管理。
+
+   ```java
+   @Service
+   public class UserService {
+   
+       @Autowired
+       private UserMapper userMapper;
+   
+       @Transactional
+       public void createUser(User user) {
+           userMapper.insertUser(user);
+           // 其他数据库操作
+       }
+   }
+   ```
+
+5. **错误处理**
+
+   处理数据库操作中的异常，确保系统的健壮性。
+
+   ```java
+   @Service
+   public class UserService {
+   
+       @Autowired
+       private UserMapper userMapper;
+   
+       public User getUserById(int id) {
+           try {
+               return userMapper.getUserById(id);
+           } catch (DataAccessException e) {
+               // 处理异常
+               System.err.println("Error fetching user: " + e.getMessage());
+               throw e;
+           }
+       }
+   }
+   ```
+
+6. **优化MyBatis性能**
+
+   利用MyBatis的缓存功能和批量操作，提高性能。
+
+   **配置二级缓存**
+
+   在`mybatis-config.xml`文件中启用二级缓存。
+
+   ```xml
+   <configuration>
+       <settings>
+           <setting name="cacheEnabled" value="true"/>
+       </settings>
+   </configuration>
+   ```
+
+   **使用批量操作**
+
+   在Mapper接口中定义批量插入或更新方法。
+
+   ```java
+   public interface UserMapper {
+       void insertUsers(List<User> users);
+   }
+   ```
+
+   在XML映射文件中使用`foreach`标签实现批量操作。
+
+   ```xml
+   <insert id="insertUsers">
+       INSERT INTO users(name, email) VALUES
+       <foreach collection="list" item="user" separator=",">
+           (#{user.name}, #{user.email})
+       </foreach>
+   </insert>
+   ```
+
+通过遵循这些最佳实践，可以高效地将MyBatis与Spring集成，提高应用程序的数据访问层的性能和可维护性。
