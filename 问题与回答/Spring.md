@@ -642,16 +642,14 @@ public class LoggingAspect {
 
 ## Spring MVC的核心组件有哪些？
 
-1. DispatchServlet：前端控制器
-2. HandlerMapping：处理器映射器
-3. HandlerAdapter：处理器适配器
-4. Controller：处理器
-5. ModelAndView：处理器处理结果
-6. ViewResolver：视图解析器
-
-## 什么是DispatcherServlet，它有什么作用？
-
-`DispatcherServlet`在Spring MVC中作为前端控制器，负责接收、分发请求，以及处理响应，协调各个组件工作，是框架的核心枢纽。
+1. DispatchServlet：它是前端控制器，负责接收客户端请求并将请求分发给合适的处理程序（Controller）进行处理。
+2. HandlerMapping：用于将请求映射到处理程序（Controller）的组件。它确定哪个 Controller 将处理特定的请求。
+3. Controller：处理请求并生成响应的组件。在 Spring MVC 中，Controller 是一个 POJO（Plain Old Java Object）类，通常用注解标记。
+4. Model：用于在处理程序（Controller）和视图之间传递数据的对象。处理程序可以将数据添加到 Model 中，然后视图可以使用这些数据来渲染页面。
+6. ViewResolver：用于解析视图逻辑名称并查找实际视图对象的组件。它将逻辑视图名称解析为实际的视图对象，以便呈现给用户。
+6. View：负责将模型数据渲染为最终的输出（通常是 HTML 页面）。
+6. HandlerInterceptor：拦截器，用于在请求处理程序执行前后进行预处理和后处理操作。可以用于实现日志记录、权限检查等功能。
+6. ModelAndView：一个包含模型数据和视图名称的对象，用于同时包含数据和视图信息。
 
 ## 解释一下Spring MVC的请求处理流程？
 
