@@ -358,10 +358,556 @@ Java采用值传递，不管是基础类型还是引用类型，传的都是值�
 5. **子类的实例代码块**（每次创建对象时执行）
 6. **子类的构造方法**（每次创建对象时执行）
 
-# 集合框架
+# String
+
+## String的基本特性？
+
+`String` 类是 Java 中用于表示字符串的类。
+
+- 一旦创建了一个 `String` 对象，它的值就不能被改变。任何对 `String` 对象的修改都会创建一个新的 `String` 对象，而不会改变原有的对象。
+- 为了提高效率和节省内存，Java 使用了字符串池。当你创建一个字符串字面量时，Java 会先检查池中是否已经存在相同的字符串。如果存在，则直接返回池中的引用；如果不存在，则创建一个新的字符串并放入池中。
+- 常用方法：
+  - `length()`: 返回字符串的长度。
+  - `charAt(int index)`: 返回指定索引处的字符。
+  - `substring(int beginIndex, int endIndex)`: 返回子字符串。
+  - `indexOf(String str)`: 返回子字符串第一次出现的索引。
+  - `toUpperCase()`: 转换为大写。
+  - `toLowerCase()`: 转换为小写。
+  - `trim()`: 去除字符串两端的空白字符。
+  - `equals(Object anObject)`: 比较字符串内容是否相同。
+  - `equalsIgnoreCase(String anotherString)`: 忽略大小写比较字符串内容是否相同。
+  - `split(String regex)`: 根据正则表达式分割字符串。
+
+## String、StringBuffer和StringBuilder的区别？
+
+在 Java 中，`String`、`StringBuilder` 和 `StringBuffer` 都是用于处理字符串的类，它们有以下区别：
+
+1. 可变性
+   - String对象不可变
+   - StringBuilder和StringBuffer可变
+2. 线程安全
+   - String由于不可变，所以线程安全
+   - StringBuilder线程不安全，StringBuffer线程安全
+3. 性能
+   - String修改的性能差
+   - StringBuilder单线程环境性能好
+   - StringBuffer性能略弱于StringBuilder，但是线程安全
+
+## String str1 = new String("abc") 和 String str2 = "abc" 的区别？
+
+- 直接使用双引号为字符串变量赋值时，首先会检查字符串常量池里是否存在相同的字符串，如果存在，就返回这个字符串的引用。如果不存在，就创建一个新的字符串，并把它放入常量池，并返回引用
+- 使用new关键字创建，每次都会重新创建新的字符串，且不会放入常量池
+
+## intern方法有什么作用？
+
+在 Java 中，`intern()` 方法是 `String` 类的一个实例方法，它的作用是将字符串放入字符串池（String Pool）中，并返回字符串池中的字符串对象引用。如果字符串池中已经包含了一个与当前字符串内容相同的字符串对象，则直接返回池中的字符串对象引用；如果字符串池中没有包含该字符串，则将当前字符串添加到字符串池中，并返回其引用。
+
+# Object
+
+## Object有哪些方法？
+
+1. **对象比较**
+   - **`public boolean equals(Object obj)`**:
+     - 用于比较两个对象是否相等。默认实现是比较对象的引用是否相同。可以在子类中重写该方法以实现自定义的比较逻辑。
+   - **`public int hashCode()`**:
+     - 返回对象的哈希码值。哈希码用于基于哈希的集合类（如 `HashMap`、`HashSet`）。可以在子类中重写该方法以确保与 `equals` 方法一致。
+2. **对象拷贝**
+   - **`protected Object clone()`**:
+     - 创建并返回当前对象的一个副本。要使用这个方法，类必须实现 `Cloneable` 接口，并重写 `clone` 方法。默认浅拷贝。
+3. **对象转字符串**
+   - **`public String toString()`**:
+     - 返回对象的字符串表示形式。默认实现返回对象的类名和哈希码。可以在子类中重写该方法以提供更有意义的字符串表示。
+4. **垃圾回收**
+   - **`protected void finalize()`**:
+     - 当垃圾收集器确定不再有对该对象的引用时，调用该方法。可以在子类中重写该方法以清理资源。
+5. **反射**
+   - **`public final Class<?> getClass()`**:
+     - 返回对象的运行时类。
+6. **多线程调度**
+   - **`public final void wait()`**:
+     - 导致当前线程等待，直到其他线程调用此对象的 `notify()` 方法或 `notifyAll()` 方法。
+   - **`public final void wait(long timeout)`**:
+     - 导致当前线程等待，直到其他线程调用此对象的 `notify()` 方法或 `notifyAll()` 方法，或者指定的时间已过。
+   - **`public final void wait(long timeout, int nanos)`**:
+     - 导致当前线程等待，直到其他线程调用此对象的 `notify()` 方法或 `notifyAll()` 方法，或者指定的时间（以毫秒和纳秒为单位）已过。
+   - **`public final void notify()`**:
+     - 唤醒在此对象监视器上等待的单个线程。
+   - **`public final void notifyAll()`**:
+     - 唤醒在此对象监视器上等待的所有线程。
 
 # 异常处理
 
+## 异常处理的层次结构？
+
+<img src="https://cdn.tobebetterjavaer.com/tobebetterjavaer/images/sidebar/sanfene/javase-22.png" alt="三分恶面渣逆袭：Java异常体系" style="zoom:67%;" />
+
+1. **Throwable**
+
+- 所有错误和异常的超类。
+
+2. **Error**
+
+- 表示严重的系统错误，程序一般不应该捕获这些错误。
+- 常见子类：
+  - `OutOfMemoryError`
+  - `StackOverflowError`
+  - `VirtualMachineError`
+
+3. **Exception**
+
+- 表示程序本身可以捕获和处理的异常。
+
+- 3.1 **运行时异常（RuntimeException）**
+
+  - 在编译时不强制要求捕获或声明。
+
+  - 常见子类：
+    - `NullPointerException`
+    - `ArrayIndexOutOfBoundsException`
+    - `ArithmeticException`
+    - `ClassCastException`
+    - `IllegalArgumentException`
+
+- 3.2 **非运行时异常（Checked Exception）**
+
+  - 在编译时必须捕获或声明的异常。
+
+  - 常见子类：
+    - `IOException`
+      - `FileNotFoundException`
+      - `EOFException`
+    - `SQLException`
+    - `ClassNotFoundException`
+    - `InterruptedException`
+
+## 异常的处理方式？
+
+1. try-catch块
+   - `try-catch`块用于捕获和处理可能在`try`块中发生的异常。`catch`块用于处理特定类型的异常。
+   - **`try`块**：包含可能抛出异常的代码。
+   - **`catch`块**：用于捕获并处理特定类型的异常。可以有多个`catch`块，处理不同类型的异常。
+   - **`finally`块**：无论是否发生异常，`finally`块中的代码都会执行。通常用于清理资源，例如关闭文件或数据库连接。
+2. throws关键字
+   - `throws`关键字用于在方法声明中指定该方法可能抛出的异常类型。调用该方法的代码必须处理这些异常，或者继续声明抛出。
+3. throw关键字
+   - `throw`关键字用于显式地抛出一个异常对象。
+4. 自定义异常
+   - 有时内置的异常类不能完全表达某种错误情况，这时可以通过继承`Exception`或`RuntimeException`类来创建自定义异常。
+5. 多重捕获
+   - 可以在一个`catch`块中捕获多个异常类型。
+6. try-with-resource
+   - Java 7 引入的`try-with-resources`语句用于自动管理资源。任何实现了`AutoCloseable`接口的资源都可以在`try`块中自动关闭。
+
 # I/O
 
-# 多线程
+## I/O流分为哪几种？
+
+在Java中，I/O流（Input/Output Stream）用于处理输入和输出操作。
+
+1. 按数据流的方向分类
+   - 输入流：用于从数据源读取数据到程序。
+   - 输出流：用于程序向数据目标写入数据
+2. 按数据处理方式分类
+   - 字节流：用于处理字节数据，适合于所有类型的I/O操作，尤其是二进制数据
+   - 字符流：用于处理字符数据，适用于文本文件的I/O操作
+3. 按数据流的功能分类
+   - 输入字节流：
+     - `InputStream`：字节输入流的抽象基类。
+     - `FileInputStream`：用于从文件中读取字节。
+     - `ByteArrayInputStream`：用于从字节数组中读取字节。
+     - `FilterInputStream`：所有过滤字节输入流的父类。
+     - `BufferedInputStream`：为另一个输入流添加一些功能，即缓冲输入流。
+     - `DataInputStream`：允许应用程序以机器无关的方式从底层输入流中读取基本 Java 数据类型。
+     - `ObjectInputStream`：用于从流中反序列化对象。
+   - 输出字节流：
+     - `OutputStream`：字节输出流的抽象基类。
+     - `FileOutputStream`：用于将字节写入文件。
+     - `ByteArrayOutputStream`：用于将字节写入字节数组。
+     - `FilterOutputStream`：所有过滤字节输出流的父类。
+     - `BufferedOutputStream`：为另一个输出流添加一些功能，即缓冲输出流。
+     - `DataOutputStream`：允许应用程序以机器无关的方式将基本 Java 数据类型写入输出流。
+     - `ObjectOutputStream`：用于将对象序列化到流中。
+   - 输入字符流：
+     - `Reader`：字符输入流的抽象基类。
+     - `FileReader`：用于从文件中读取字符。
+     - `CharArrayReader`：用于从字符数组中读取字符。
+     - `BufferedReader`：为另一个输入字符流添加一些功能，即缓冲输入字符流。
+     - `InputStreamReader`：将字节流转换为字符流。
+     - `StringReader`：用于从字符串中读取字符。
+   - 输出字符流：
+     - `Writer`：字符输出流的抽象基类。
+     - `FileWriter`：用于将字符写入文件。
+     - `CharArrayWriter`：用于将字符写入字符数组。
+     - `BufferedWriter`：为另一个输出字符流添加一些功能，即缓冲输出字符流。
+     - `OutputStreamWriter`：将字符流转换为字节流。
+     - `StringWriter`：用于将字符写入字符串。
+4. 按功能细分的其他流
+   - 数据流：用于读写原始数据类型。
+     - `DataInputStream` 和 `DataOutputStream`。
+   - 对象流：用于读写对象。
+     - `ObjectInputStream` 和 `ObjectOutputStream`。
+   - 缓冲流：用于提高I/O操作的效率。
+     - `BufferedInputStream`，`BufferedOutputStream`，`BufferedReader`，`BufferedWriter`。
+   - 转换流：用于字节流和字符流之间的转换。
+     - `InputStreamReader` 和 `OutputStreamWriter`。
+
+## 有了字节流，为什么还要字符流？
+
+- 字符流可以处理字符编码问题，避免乱码
+- 有更高层次抽象的封装，比如可以直接读取整行文本
+- 比使用字节流处理效率更高
+
+## 说一下BIO、NIO、AIO和它们之间的区别？
+
+Java提供了三种主要的I/O模型：BIO（Blocking I/O）、NIO（Non-blocking I/O）和AIO（Asynchronous I/O）。
+
+1. **BIO（Blocking I/O）**
+
+   - **特点**
+     - **阻塞模式**：BIO是传统的I/O模型，I/O操作是阻塞的。也就是说，当一个线程进行I/O操作时，如果没有数据可读或无法写入数据，线程会被阻塞，直到数据准备好。
+     - **一个连接一个线程**：在BIO模型中，每个客户端连接都会占用一个独立的线程，这在高并发场景下会导致大量的线程创建和销毁，增加系统的开销。
+   - **适用场景**
+     - 适用于连接数较少且固定的场景。
+     - 适用于对实时性要求不高的应用。
+
+2. **NIO（Non-blocking I/O）**
+
+   - **特点**
+     - **非阻塞模式**：NIO引入了非阻塞I/O操作，线程可以在等待I/O操作完成的同时执行其他任务。
+     - **单线程处理多连接**：NIO使用了选择器（Selector）机制，一个线程可以管理多个客户端连接，通过轮询的方式检查I/O事件。
+     - **缓冲区**：NIO引入了缓冲区（Buffer）来读写数据，数据先存储在缓冲区中，然后再进行处理。
+   - **适用场景**
+     - 适用于连接数较多且连接时间较长的场景。
+     - 适用于对实时性要求较高的应用。
+
+3. **AIO（Asynchronous I/O）**
+
+   - **特点**
+     - **异步非阻塞模式**：AIO是异步非阻塞I/O模型，I/O操作是异步的，操作完成后会通过回调机制通知应用程序。
+     - **简化编程**：AIO简化了编程模型，因为I/O操作是异步的，线程不需要等待I/O操作完成。
+   - **适用场景**
+     - 适用于连接数较多且连接时间较长的场景。
+     - 适用于对实时性要求较高的应用。
+     - 适用于复杂的I/O操作，如文件传输等。
+
+4. **区别总结**
+
+   1. **阻塞与非阻塞**：
+      - BIO：阻塞I/O，线程会被阻塞，直到I/O操作完成。
+      - NIO：非阻塞I/O，线程可以在等待I/O操作完成的同时执行其他任务。
+      - AIO：异步非阻塞I/O，I/O操作是异步的，操作完成后通过回调机制通知应用程序。
+   2. **线程模型**：
+      - BIO：一个连接一个线程。
+      - NIO：一个线程可以管理多个连接，通过选择器机制进行管理。
+      - AIO：一个线程可以管理多个连接，通过异步回调机制进行管理。
+   3. **适用场景**：
+      - BIO：适用于连接数较少且固定的场景，对实时性要求不高的应用。
+      - NIO：适用于连接数较多且连接时间较长的场景，对实时性要求较高的应用。
+      - AIO：适用于连接数较多且连接时间较长的场景，对实时性要求较高的应用，特别适用于复杂的I/O操作。
+
+5. **总结**
+
+   BIO、NIO和AIO各有优缺点和适用场景。选择哪种I/O模型取决于具体的应用需求和场景。在高并发和高实时性要求的应用中，NIO和AIO通常是更好的选择，而在简单的、连接数较少的应用中，BIO可能更为适用。
+
+# 序列化
+
+## 什么是序列化？什么是反序列化？
+
+Java序列化是一种机制，通过它可以将对象的状态转换为字节流，以便将对象保存到文件、数据库，或者通过网络传输到另一个Java虚拟机（JVM）。反序列化则是将字节流恢复为对象的过程。
+
+**序列化的前提**
+
+1. **实现Serializable接口**
+   - 一个类必须实现`java.io.Serializable`接口才能使其对象可序列化。这个接口是一个标记接口（没有任何方法），它只是告诉JVM这个类的对象可以被序列化。
+2. **serialVersionUID**
+   - `serialVersionUID`是一个唯一的标识符，用于版本控制。如果类的定义发生变化（如添加或删除字段），会影响序列化和反序列化的兼容性。显式声明`serialVersionUID`可以避免因类的修改导致的反序列化失败。
+
+- `serialVersionUID`是一个唯一的标识符，用于版本控制。如果类的定义发生变化（如添加或删除字段），会影响序列化和反序列化的兼容性。显式声明`serialVersionUID`可以避免因类的修改导致的反序列化失败。
+
+**序列化的控制**
+
+1. **transient关键字**
+   - 使用`transient`关键字修饰的字段不会被序列化。
+2. **自定义序列化**
+   - 通过实现`readObject`和`writeObject`方法，可以自定义序列化和反序列化过程。
+
+**序列化的应用场景**
+
+1. **持久化对象状态**：将对象的状态保存到文件或数据库中，以便在以后恢复。
+2. **网络传输**：通过网络传输对象，例如在分布式系统中，多个JVM之间传递对象。
+3. **缓存**：将对象序列化后存储在缓存中，以便快速恢复对象状态。
+
+**序列化的注意事项**
+
+1. **版本控制**：确保`serialVersionUID`一致，以避免版本不兼容问题。
+2. **安全性**：序列化和反序列化过程可能会引入安全漏洞，特别是反序列化时。如果字节流来自不可信的来源，可能会导致反序列化漏洞。因此，应该避免反序列化不可信的数据。
+3. **性能**：序列化和反序列化是一个相对昂贵的操作，可能会影响性能。在高性能要求的场景下，需要谨慎使用。
+
+## 序列化的几种方式？
+
+- **Java原生序列化**：这是最常见和基础的序列化方式，通过实现`java.io.Serializable`接口来实现对象的序列化和反序列化。
+- **Json序列化**：使用第三方库（如Jackson、Gson）将对象序列化为JSON格式。JSON格式具有可读性强、跨语言支持好等优点。
+- **XML序列化**：使用第三方库（如XStream、JAXB）将对象序列化为XML格式。
+- **ProtoBuff序列化**：Protocol Buffers是Google开发的一种高效的二进制序列化格式，适用于跨语言的数据交换。
+
+# 泛型
+
+## 什么是Java泛型？常见的通配符？
+
+Java泛型是Java 5引入的一种语言特性，允许在定义类、接口和方法时使用类型参数，从而使代码更加通用和类型安全。泛型的主要目的是在编译时提供类型检查，并减少类型转换的需要。
+
+**基本概念**
+
+1. **泛型类**：在类定义中使用类型参数。
+2. **泛型接口**：在接口定义中使用类型参数。
+3. **泛型方法**：在方法定义中使用类型参数。
+
+**常见的通配符**
+
+Java泛型中的通配符用于表示未知类型，主要有以下几种：
+
+1. **无界通配符**（`<?>`）
+   - 无界通配符表示任何类型。它通常用于表示对类型参数没有任何限制的情况。
+2. **上界通配符**（`<? extends T>`）
+   - 上界通配符表示类型参数必须是指定类型的子类型（包括指定类型本身）。
+3. **下界通配符**（`<? super T>`）
+   - 下界通配符表示类型参数必须是指定类型的超类型（包括指定类型本身）。
+
+# 注解
+
+## 什么是注解？
+
+注解（Annotation）是Java中的一种元数据（metadata）机制，允许在代码中添加额外的信息。注解可以用于类、方法、字段、参数、局部变量等各种元素，并且这些信息可以在编译时或运行时通过反射机制进行访问和处理。
+
+**基本概念**
+
+1. **元注解（Meta-Annotation）**：用于定义其他注解的注解。
+2. **内置注解**：Java提供的一些常用注解。
+3. **自定义注解**：用户可以根据需要定义自己的注解。
+
+**常见的元注解**
+
+1. **@Retention**：指定注解的保留策略。
+   - **RetentionPolicy.SOURCE**：注解只在源代码中存在，编译后会被丢弃。
+   - **RetentionPolicy.CLASS**：注解在编译时存在于类文件中，但在运行时不可见（默认策略）。
+   - **RetentionPolicy.RUNTIME**：注解在运行时可通过反射机制访问。
+2. **@Target**：指定注解可以应用的程序元素。
+   - **ElementType.TYPE**：类、接口、枚举。
+   - **ElementType.FIELD**：字段。
+   - **ElementType.METHOD**：方法。
+   - **ElementType.PARAMETER**：参数。
+   - **ElementType.CONSTRUCTOR**：构造方法。
+   - **ElementType.LOCAL_VARIABLE**：局部变量。
+   - **ElementType.ANNOTATION_TYPE**：注解类型。
+   - **ElementType.PACKAGE**：包。
+3. **@Documented**：指定注解是否包含在Javadoc中。
+4. **@Inherited**：指定注解是否可以被子类继承。
+
+**常见的内置注解**
+
+1. **@Override**：表示方法是重写父类方法。
+2. **@Deprecated**：表示方法、类或字段已过时，不建议使用。
+3. **@SuppressWarnings**：表示抑制编译器警告。
+
+**自定义注解**
+
+用户可以根据需要定义自己的注解。
+
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface MyAnnotation {
+    String value();
+}
+
+public class MyClass {
+    @MyAnnotation("Hello")
+    public void myMethod() {
+        System.out.println("My Method");
+    }
+}
+```
+
+**反射机制获取注解信息**
+
+通过反射机制可以在运行时获取注解信息。
+
+```java
+import java.lang.reflect.Method;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Method method = MyClass.class.getMethod("myMethod");
+        MyAnnotation annotation = method.getAnnotation(MyAnnotation.class);
+        System.out.println(annotation.value());
+    }
+}
+```
+
+**总结**
+
+1. **注解**：用于在代码中添加元数据，可以应用于类、方法、字段等。
+2. **元注解**：用于定义注解的注解，如`@Retention`、`@Target`等。
+3. **内置注解**：Java提供的常用注解，如`@Override`、`@Deprecated`等。
+4. **自定义注解**：用户可以根据需要定义自己的注解。
+5. **反射机制**：可以在运行时获取注解信息。
+
+# 反射
+
+## 什么是反射？有什么应用？原理是什么？
+
+反射（Reflection）是Java语言中的一种机制，允许程序在运行时检查和修改自身的结构和行为。通过反射，程序可以动态地获取类的相关信息（如类名、方法、字段、构造方法等），并且可以在运行时创建对象、调用方法和访问字段。
+
+**反射的基本概念**
+
+1. **Class对象**：每个类在运行时都有一个`Class`对象，包含了关于该类的所有信息。
+2. **Method对象**：表示类的方法，可以用来调用方法。
+3. **Field对象**：表示类的字段，可以用来访问和修改字段的值。
+4. **Constructor对象**：表示类的构造方法，可以用来创建新的实例。
+
+**反射的应用场景**
+
+1. **框架和库**：如Spring、Hibernate等框架广泛使用反射来实现依赖注入、AOP（面向切面编程）等功能。
+2. **动态代理**：Java的动态代理机制利用反射来创建代理对象。
+3. **工具和IDE**：如Eclipse、IntelliJ IDEA等开发工具使用反射来提供代码分析和自动补全功能。
+4. **序列化和反序列化**：如JSON、XML解析库使用反射来将对象转换为数据格式，或从数据格式还原对象。
+5. **测试框架**：如JUnit使用反射来调用测试方法。
+
+**反射的原理**
+
+反射的核心是`java.lang.reflect`包，该包提供了一些类和接口，用于获取类的结构信息和操作类的成员。
+
+1. **获取Class对象**：可以通过以下几种方式获取类的`Class`对象：
+   - 使用`Class.forName("类的全限定名")`。
+   - 使用`类名.class`。
+   - 使用`对象.getClass()`。
+2. **获取类的信息**：通过`Class`对象可以获取类的构造方法、字段、方法等信息。
+   - `getConstructors()`：获取所有公共构造方法。
+   - `getDeclaredConstructors()`：获取所有构造方法（包括私有、保护、默认、公有）。
+   - `getMethods()`：获取所有公共方法，包括从父类继承的方法。
+   - `getDeclaredMethods()`：获取所有方法（包括私有、保护、默认、公有）。
+   - `getFields()`：获取所有公共字段。
+   - `getDeclaredFields()`：获取所有字段（包括私有、保护、默认、公有）。
+3. **创建对象**：通过反射可以动态地创建类的实例。
+   - 使用`newInstance()`方法。
+   - 使用`Constructor`对象的`newInstance()`方法。
+4. **调用方法**：通过反射可以动态地调用类的方法。
+   - 使用`Method`对象的`invoke()`方法。
+5. **访问字段**：通过反射可以动态地访问和修改类的字段。
+   - 使用`Field`对象的`get()`和`set()`方法。
+
+**反射的优缺点**
+
+**优点**：
+
+1. **动态性**：反射允许在运行时动态地操作类和对象，增强了程序的灵活性和可扩展性。
+2. **通用性**：许多框架和库使用反射来实现通用的功能，如依赖注入、序列化等。
+
+**缺点**：
+
+1. **性能开销**：反射操作通常比直接调用慢，因为需要进行动态解析。
+2. **安全性问题**：反射可以绕过访问控制，可能会导致安全漏洞。
+3. **复杂性**：反射代码通常较为复杂，不易理解和维护。
+
+# JDK1.8 特性
+
+## Lambda表达式？
+
+Lambda表达式引入了一种更简洁的方式来表示匿名函数，使代码更简洁和易读。Lambda表达式的语法如下：
+
+```java
+(parameters) -> expression
+或
+(parameters) -> { statements; }
+```
+
+示例：
+
+```java
+// 传统方式
+new Thread(new Runnable() {
+    @Override
+    public void run() {
+        System.out.println("Hello, world!");
+    }
+}).start();
+
+// Lambda表达式
+new Thread(() -> System.out.println("Hello, world!")).start();
+```
+
+## 函数式接口？
+
+函数式接口是只包含一个抽象方法的接口，可以通过Lambda表达式来实例化。JDK 8引入了`@FunctionalInterface`注解来标识函数式接口。常见的函数式接口有`Runnable`、`Callable`、`Comparator`等。
+
+```java
+@FunctionalInterface
+public interface MyFunctionalInterface {
+    void myMethod();
+}
+
+// 使用Lambda表达式
+MyFunctionalInterface myFunc = () -> System.out.println("Hello Functional Interface");
+myFunc.myMethod();
+```
+
+## 方法引用和构造器引用？
+
+方法引用和构造器引用提供了一种简洁的方式来引用现有的方法或构造器。
+
+```java
+// 方法引用
+Consumer<String> print = System.out::println;
+print.accept("Hello Method Reference");
+
+// 构造器引用
+Supplier<List<String>> listSupplier = ArrayList::new;
+List<String> list = listSupplier.get();
+```
+
+## 默认方法和静态方法？
+
+JDK 8允许在接口中定义默认方法和静态方法。默认方法使用`default`关键字定义，可以有方法体；静态方法使用`static`关键字定义。
+
+```java
+public interface MyInterface {
+    default void defaultMethod() {
+        System.out.println("Default Method");
+    }
+
+    static void staticMethod() {
+        System.out.println("Static Method");
+    }
+}
+
+public class MyClass implements MyInterface {
+    public static void main(String[] args) {
+        MyClass myClass = new MyClass();
+        myClass.defaultMethod();
+        MyInterface.staticMethod();
+    }
+}
+```
+
+## Stream API？
+
+Stream API提供了一种高效且易于使用的方式来处理集合数据。它支持各种操作，如过滤、映射、归约等。
+
+```java
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+names.stream()
+     .filter(name -> name.startsWith("A"))
+     .forEach(System.out::println);
+```
+
+## Optional类
+
+`Optional`类用于防止`NullPointerException`，提供了一种优雅的方式来处理可能为null的值。
+
+## 新的日期和时间API
+
+JDK 8引入了全新的日期和时间API（`java.time`包），提供了更好的日期和时间处理功能，如`LocalDate`、`LocalTime`、`LocalDateTime`、`ZonedDateTime`等。
+
+## Base64编码和解码
+
+JDK 8提供了内置的Base64编码和解码功能。
